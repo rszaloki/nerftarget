@@ -1,25 +1,75 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-layout/app-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../nerftarget-accelerometer/nerftarget-accelerometer.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+
+
 
 <dom-module id="nerftarget-app">
   <template>
     <style>
       :host {
+        position: fixed;
+        top:0;
+        bottom:0;
+        left:0;
+        right:0;
         display: block;
+        font-family: sans-serif;
+        background-color: var(--paper-grey-50);
+      }
+
+      app-header {
+        background-color: var(--paper-blue-500);
+        color: white;
+      }
+
+      paper-button {
+        background-color: var(--paper-blue-500);
+        color:white;
+      }
+
+      #content {
+        padding: 1em;
       }
     </style>
-    <h2>Hello [[prop1]]</h2>
+    <app-header-layout>
+      <app-header fixed condenses effects="waterfall">
+        <app-toolbar>
+          <div main-title>nerftarget!</div>
+        </app-toolbar>
+      </app-header>
+      <div id="content">
+        <paper-button id="connect" raised>Connect</paper-button>
+        <paper-input label="x" value="{{accX}}"></paper-input>
+        <paper-input label="y" value="{{accY}}"></paper-input>
+        <paper-input label="z" value="{{accZ}}"></paper-input>        
+      </div>
+      <nerftarget-accelerometer x="{{accX}}" y="{{accY}}" z="{{accZ}}"></nerftarget-accelerometer>
+    </app-header-layout>
   </template>
 
   <script>
     Polymer({
 
       is: 'nerftarget-app',
+      ready: function() {
+        let connectButton = this.$$('#connect');
+        let acceleroMeter = this.$$('nerftarget-accelerometer')
+        connectButton.addEventListener('click', (event) => acceleroMeter.connect() );
+
+        var littleEndian = (function() {
+          var buffer = new ArrayBuffer(2);
+          new DataView(buffer).setInt16(0, 256, true /* littleEndian */);
+          // Int16Array uses the platform's endianness.
+          return new Int16Array(buffer)[0] === 256;
+        })();
+        console.log('littleEndian: '+littleEndian); // true or false
+      },
 
       properties: {
-        prop1: {
-          type: String,
-          value: 'nerftarget-app',
-        },
       },
 
     });
