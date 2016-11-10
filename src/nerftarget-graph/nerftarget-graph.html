@@ -34,10 +34,12 @@
                 let ctx = this.canvas.getContext('2d');
                 let i;
                 this.canvas.width=400;
+                ctx.beginPath();
                 for(i=0; i< this.series.length; i++) {
-                    ctx.rect(i,100-this.series[i],1,1);
-                    ctx.stroke();
+                    ctx.moveTo(i, 200);
+                    ctx.lineTo(i,200-this.series[i]);
                 }
+                ctx.stroke();
                 this.rafId = null;
             }
         })

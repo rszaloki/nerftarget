@@ -45,7 +45,7 @@
                 this.x = x;
                 this.y = y;
                 this.z = z;
-                this.d = Math.sqrt(d);
+                this.d = Math.abs(Math.sqrt(d));
              },
             connect: function() {
                 let bd = this.$$('platinum-bluetooth-device');
