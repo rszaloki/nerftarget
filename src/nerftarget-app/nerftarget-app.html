@@ -4,6 +4,8 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../nerftarget-accelerometer/nerftarget-accelerometer.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../nerftarget-graph/nerftarget-graph.html">
+
 
 
 
@@ -47,12 +49,24 @@
         <paper-input label="y" value="{{accY}}"></paper-input>
         <paper-input label="z" value="{{accZ}}"></paper-input>        
       </div>
-      <nerftarget-accelerometer x="{{accX}}" y="{{accY}}" z="{{accZ}}"></nerftarget-accelerometer>
+      <nerftarget-graph series="{{series}}"></nerftarget-graph>
+      <nerftarget-accelerometer x="{{accX}}" y="{{accY}}" z="{{accZ}}" d="{{vec}}"></nerftarget-accelerometer>
     </app-header-layout>
   </template>
 
   <script>
     Polymer({
+      properties: {
+        vec: {
+          type: Number,
+          observer: 'vecChangeHandler'
+        },
+        series: {
+          type: Array,
+          value:[],
+          notify:true
+        }
+      },
 
       is: 'nerftarget-app',
       ready: function() {
@@ -69,8 +83,12 @@
         console.log('littleEndian: '+littleEndian); // true or false
       },
 
-      properties: {
-      },
+      vecChangeHandler: function(newVal) {
+        this.push('series', newVal);
+        if(this.series.length > 400) {
+          this.shift('series');
+        }
+      }
 
     });
   </script>
