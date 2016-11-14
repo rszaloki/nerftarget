@@ -1,0 +1,48 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="nerftarget-hit">
+    <template>
+        <style>
+            :host {
+                 display:none;
+            }
+        </style>
+    </template>
+    <script>
+        Polymer({
+            properties: {
+                hit: {
+                    value:false,
+                    notify: true
+                },
+                currentVector: {
+                    type:Number,
+                    value:0,
+                    observer: "currentVectorChanged"
+                },
+                lastItems: {
+                    type:Array,
+                    value: [0,0,0,0,0,0,0,0,0,0]
+                },
+                currentMedian: {
+                    type:Number,
+                    value:0
+                }
+            },
+            sum: function(a) {
+                return a.reduce((current, prev) => prev + current,0);
+            },
+            currentVectorChanged: function(newVal) {
+                if(this.lastItems) {
+                    this.lastItems.push(newVal);
+                    this.lastItems.shift();
+                    this.currentMedian = this.sum(this.lastItems) / this.lastItems.length;
+                    this.hit = newVal > this.currentMedian * 1.2; 
+                    console.log(this.currentMedian, newVal, this.hit);
+                }
+            },
+
+            is:'nerftarget-hit'
+        })
+    </script>
+</dom-module>

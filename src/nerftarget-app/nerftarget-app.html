@@ -5,6 +5,7 @@
 <link rel="import" href="../nerftarget-accelerometer/nerftarget-accelerometer.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../nerftarget-graph/nerftarget-graph.html">
+<link rel="import" href="../nerftarget-hit/nerftarget-hit.html">
 
 
 
@@ -44,13 +45,19 @@
         </app-toolbar>
       </app-header>
       <div id="content">
-        <paper-button id="connect" raised>Connect</paper-button>
+        <template is="dom-if" if="{{!device}}">
+          <paper-button id="connect" raised on-tap="connect">Connect</paper-button>
+        </template>
+        <template is="dom-if" if="{{device}}">
+          <paper-button id="disconnect" raised on-tap="disconnect">Disconnect</paper-button>
+        </template>
         <paper-input label="x" value="{{accX}}"></paper-input>
         <paper-input label="y" value="{{accY}}"></paper-input>
         <paper-input label="z" value="{{accZ}}"></paper-input>        
       </div>
       <nerftarget-graph series="{{series}}"></nerftarget-graph>
-      <nerftarget-accelerometer x="{{accX}}" y="{{accY}}" z="{{accZ}}" d="{{vec}}"></nerftarget-accelerometer>
+      <nerftarget-accelerometer x="{{accX}}" y="{{accY}}" z="{{accZ}}" d="{{vec}}" device="{{device}}"></nerftarget-accelerometer>
+      <nerftarget-hit current-vector="{{vec}}"></nerftarget-hit>
     </app-header-layout>
   </template>
 
@@ -72,7 +79,6 @@
       ready: function() {
         let connectButton = this.$$('#connect');
         let acceleroMeter = this.$$('nerftarget-accelerometer')
-        connectButton.addEventListener('click', (event) => acceleroMeter.connect() );
 
         var littleEndian = (function() {
           var buffer = new ArrayBuffer(2);
@@ -81,6 +87,14 @@
           return new Int16Array(buffer)[0] === 256;
         })();
         console.log('littleEndian: '+littleEndian); // true or false
+      },
+
+      connect: function(){
+        this.$$('nerftarget-accelerometer').connect();
+      },
+
+      disconnect: function() {
+        this.$$('nerftarget-accelerometer').disconnect();
       },
 
       vecChangeHandler: function(newVal) {
