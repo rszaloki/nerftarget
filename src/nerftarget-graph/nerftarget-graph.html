@@ -16,6 +16,12 @@
                 series: {
                     type:Array,
                     value:[]
+                },
+                median: {
+                    type: Number
+                },
+                hitLevel: {
+                    type:Number
                 }
             },
             rafId: null,
@@ -33,13 +39,30 @@
             paint: function() {
                 let ctx = this.canvas.getContext('2d');
                 let i;
+                let h = this.canvas.height;
+                let medianY = h -  this.median;
+                let hitLevelY = h - this.median * this.hitLevel;
                 this.canvas.width=400;
                 ctx.beginPath();
+                ctx.strokeStyle = '#222222';
                 for(i=0; i< this.series.length; i++) {
-                    ctx.moveTo(i, 200);
-                    ctx.lineTo(i,200-this.series[i]);
+                    ctx.moveTo(i, h);
+                    ctx.lineTo(i,h-this.series[i]);
                 }
+
                 ctx.stroke();
+                ctx.beginPath();
+                ctx.strokeStyle = 'blue';
+                ctx.moveTo(0, medianY);
+                ctx.lineTo(this.canvas.width, medianY);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.strokeStyle = 'red';
+                ctx.moveTo(0, hitLevelY);
+                ctx.lineTo(this.canvas.width, hitLevelY );
+                ctx.stroke();
+                
                 this.rafId = null;
             }
         })

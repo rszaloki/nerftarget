@@ -22,23 +22,32 @@
                 },
                 lastItems: {
                     type:Array,
-                    value: [0,0,0,0,0,0,0,0,0,0]
+                    value: []
                 },
                 currentMedian: {
                     type:Number,
-                    value:0
+                    value:0,
+                    notify: true
+                },
+                hitLevel: {
+                    type: Number,
+                    value:1.9
                 }
             },
-            sum: function(a) {
-                return a.reduce((current, prev) => prev + current,0);
+            countMedian: function(a) {
+                return a.reduce((current, prev) => prev + current,0) / a.length;
             },
             currentVectorChanged: function(newVal) {
                 if(this.lastItems) {
                     this.lastItems.push(newVal);
-                    this.lastItems.shift();
-                    this.currentMedian = this.sum(this.lastItems) / this.lastItems.length;
-                    this.hit = newVal > this.currentMedian * 1.2; 
-                    console.log(this.currentMedian, newVal, this.hit);
+                    if(this.lastItems.length > 30) {
+                        this.lastItems.shift();
+                    }
+                    this.currentMedian = this.countMedian(this.lastItems);
+                    this.hit = newVal > this.currentMedian * this.hitLevel;
+                    if(this.hit) {
+                        console.log(this.currentMedian, newVal, this.hit);
+                    } 
                 }
             },
 

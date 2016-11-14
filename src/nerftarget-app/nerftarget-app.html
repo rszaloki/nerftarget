@@ -22,6 +22,7 @@
         display: block;
         font-family: sans-serif;
         background-color: var(--paper-grey-50);
+        text-align:center;        
       }
 
       app-header {
@@ -35,29 +36,33 @@
       }
 
       #content {
-        padding: 1em;
+        color: var(--paper-grey-800);
+      }
+
+      .hitcounter {
+        font-size: 120px;
+        line-height:2em;
+        font-family: monospace;
       }
     </style>
     <app-header-layout>
       <app-header fixed condenses effects="waterfall">
         <app-toolbar>
-          <div main-title>nerftarget!</div>
+          <template is="dom-if" if="{{!device}}">
+            <paper-button id="connect" raised on-tap="connect">Connect</paper-button>
+          </template>
+          <template is="dom-if" if="{{device}}">
+            <paper-button id="disconnect" raised on-tap="disconnect">Disconnect</paper-button>
+          </template>
         </app-toolbar>
       </app-header>
       <div id="content">
-        <template is="dom-if" if="{{!device}}">
-          <paper-button id="connect" raised on-tap="connect">Connect</paper-button>
-        </template>
-        <template is="dom-if" if="{{device}}">
-          <paper-button id="disconnect" raised on-tap="disconnect">Disconnect</paper-button>
-        </template>
-        <paper-input label="x" value="{{accX}}"></paper-input>
-        <paper-input label="y" value="{{accY}}"></paper-input>
-        <paper-input label="z" value="{{accZ}}"></paper-input>        
+        <div class="hitcounter">{{hitCount}}</div>
+        <nerftarget-graph series="{{series}}" median="{{currentMedian}}" hit-level="{{hitLevel}}"></nerftarget-graph>
+        <div><label>current median:</label>{{currentMedian}}</div>
       </div>
-      <nerftarget-graph series="{{series}}"></nerftarget-graph>
       <nerftarget-accelerometer x="{{accX}}" y="{{accY}}" z="{{accZ}}" d="{{vec}}" device="{{device}}"></nerftarget-accelerometer>
-      <nerftarget-hit current-vector="{{vec}}"></nerftarget-hit>
+      <nerftarget-hit current-vector="{{vec}}" hit="{{currentHit}}" current-median="{{currentMedian}}" hit-level="{{hitLevel}}"></nerftarget-hit>
     </app-header-layout>
   </template>
 
@@ -72,6 +77,19 @@
           type: Array,
           value:[],
           notify:true
+        },
+        hitLevel:{
+          type:Number,
+          value:2
+        },
+        hitCount: {
+          type: Number,
+          value: 0
+        },
+        currentHit: {
+          type: Boolean,
+          value: false,
+          observer: 'hitChange'
         }
       },
 
@@ -91,10 +109,34 @@
 
       connect: function(){
         this.$$('nerftarget-accelerometer').connect();
+        this.hitCount = 0;
       },
 
       disconnect: function() {
         this.$$('nerftarget-accelerometer').disconnect();
+      },
+
+      startHitMeasure: function(){
+        if(this.measuring) {
+          return Promise.resolve(0);
+        }
+
+        return new Promise(function(resolve, reject){
+          this.measuring = true;
+          setTimeout(()=>{
+            resolve(this.currentHit ? 0 : 1);
+          },500);
+        });
+
+      },
+
+      hitChange: function(newVal){
+        if(newVal) {
+          this.startHitMeasure().then((countedHit) => {
+            this.hitCount+=countedHit;
+            this.measuring = false;
+          });
+        }
       },
 
       vecChangeHandler: function(newVal) {
