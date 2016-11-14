@@ -41,12 +41,13 @@
                 let i;
                 let h = this.canvas.height;
                 let medianY = h -  this.median;
-                let hitLevelY = h - this.median * this.hitLevel;
+                let hitLevelHighY = h - this.median + this.median * this.hitLevel;
+                let hitLevelLowY = h - this.median - this.median * this.hitLevel;
                 this.canvas.width=400;
                 ctx.beginPath();
                 ctx.strokeStyle = '#222222';
-                for(i=0; i< this.series.length; i++) {
-                    ctx.moveTo(i, h);
+                ctx.moveTo(0, h - this.series[0]);
+                for(i=1; i< this.series.length; i++) {
                     ctx.lineTo(i,h-this.series[i]);
                 }
 
@@ -59,8 +60,10 @@
                 
                 ctx.beginPath();
                 ctx.strokeStyle = 'red';
-                ctx.moveTo(0, hitLevelY);
-                ctx.lineTo(this.canvas.width, hitLevelY );
+                ctx.moveTo(0, hitLevelHighY);
+                ctx.lineTo(this.canvas.width, hitLevelHighY );
+                ctx.moveTo(0, hitLevelLowY);
+                ctx.lineTo(this.canvas.width, hitLevelLowY );
                 ctx.stroke();
                 
                 this.rafId = null;

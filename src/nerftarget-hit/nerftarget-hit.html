@@ -31,22 +31,26 @@
                 },
                 hitLevel: {
                     type: Number,
-                    value:1.9
+                    value:0.2
                 }
             },
             countMedian: function(a) {
                 return a.reduce((current, prev) => prev + current,0) / a.length;
             },
             currentVectorChanged: function(newVal) {
+                let hitLow, hitHigh;
+
                 if(this.lastItems) {
                     this.lastItems.push(newVal);
                     if(this.lastItems.length > 30) {
                         this.lastItems.shift();
                     }
                     this.currentMedian = this.countMedian(this.lastItems);
-                    this.hit = newVal > this.currentMedian * this.hitLevel;
+                    hitLow = this.currentMedian - this.currentMedian * this.hitLevel;
+                    hitHigh = this.currentMedian + this.currentMedian * this.hitLevel;
+                    this.hit = newVal > hitHigh || newVal < hitLow;
                     if(this.hit) {
-                        console.log(this.currentMedian, newVal, this.hit);
+                        console.log(this.currentMedian, hitLow, newVal, hitHigh, this.hit);
                     } 
                 }
             },

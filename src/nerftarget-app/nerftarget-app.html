@@ -80,7 +80,7 @@
         },
         hitLevel:{
           type:Number,
-          value:2
+          value:0.4
         },
         hitCount: {
           type: Number,
@@ -117,10 +117,6 @@
       },
 
       startHitMeasure: function(){
-        if(this.measuring) {
-          return Promise.resolve(0);
-        }
-
         return new Promise(function(resolve, reject){
           this.measuring = true;
           setTimeout(()=>{
@@ -131,7 +127,7 @@
       },
 
       hitChange: function(newVal){
-        if(newVal) {
+        if(newVal && !this.measuring) {
           this.startHitMeasure().then((countedHit) => {
             this.hitCount+=countedHit;
             this.measuring = false;
