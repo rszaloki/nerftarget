@@ -58,20 +58,19 @@
       </app-header>
       <div id="content">
         <div class="hitcounter">{{hitCount}}</div>
-        <nerftarget-graph series="{{series}}" median="{{currentMedian}}" hit-level="{{hitLevel}}"></nerftarget-graph>
-        <div><label>current median:</label>{{currentMedian}}</div>
+        <nerftarget-graph series="{{series}}"></nerftarget-graph>
       </div>
       <nerftarget-accelerometer x="{{accX}}" y="{{accY}}" z="{{accZ}}" d="{{vec}}" device="{{device}}"></nerftarget-accelerometer>
-      <nerftarget-hit current-vector="{{vec}}" hit="{{currentHit}}" current-median="{{currentMedian}}" hit-level="{{hitLevel}}"></nerftarget-hit>
+      <nerftarget-hit current-vector="{{vec}}" hit="{{currentHit}}" hit-level="{{hitLevel}}" hit-object="{{currentData}}"></nerftarget-hit>
     </app-header-layout>
   </template>
 
   <script>
     Polymer({
       properties: {
-        vec: {
-          type: Number,
-          observer: 'vecChangeHandler'
+        currentData: {
+          type: Object,
+          observer: 'dataChangeHandler'
         },
         series: {
           type: Array,
@@ -135,7 +134,7 @@
         }
       },
 
-      vecChangeHandler: function(newVal) {
+      dataChangeHandler: function(newVal) {
         this.push('series', newVal);
         if(this.series.length > 400) {
           this.shift('series');

@@ -16,12 +16,6 @@
                 series: {
                     type:Array,
                     value:[]
-                },
-                median: {
-                    type: Number
-                },
-                hitLevel: {
-                    type:Number
                 }
             },
             rafId: null,
@@ -36,36 +30,23 @@
                     this.rafId = window.requestAnimationFrame(this.paint.bind(this));
                 }
             },
-            paint: function() {
+            paintSeries: function(series, style){
                 let ctx = this.canvas.getContext('2d');
-                let i;
                 let h = this.canvas.height;
-                let medianY = h -  this.median;
-                let hitLevelHighY = h - this.median + this.median * this.hitLevel;
-                let hitLevelLowY = h - this.median - this.median * this.hitLevel;
-                this.canvas.width=400;
                 ctx.beginPath();
-                ctx.strokeStyle = '#222222';
-                ctx.moveTo(0, h - this.series[0]);
-                for(i=1; i< this.series.length; i++) {
-                    ctx.lineTo(i,h-this.series[i]);
+                ctx.strokeStyle = style;
+                ctx.moveTo(0, h - series[0]);
+                for(let i=1; i< series.length; i++) {
+                    ctx.lineTo(i,h-series[i]);
                 }
-
                 ctx.stroke();
-                ctx.beginPath();
-                ctx.strokeStyle = 'blue';
-                ctx.moveTo(0, medianY);
-                ctx.lineTo(this.canvas.width, medianY);
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.strokeStyle = 'red';
-                ctx.moveTo(0, hitLevelHighY);
-                ctx.lineTo(this.canvas.width, hitLevelHighY );
-                ctx.moveTo(0, hitLevelLowY);
-                ctx.lineTo(this.canvas.width, hitLevelLowY );
-                ctx.stroke();
-                
+            },
+            paint: function() {
+                this.canvas.width = 400;
+                this.paintSeries(this.series.map(item => item.current), 'grey' );
+                this.paintSeries(this.series.map(item => item.hitHigh), 'red' );
+                this.paintSeries(this.series.map(item => item.hitLow), 'red' );
+                this.paintSeries(this.series.map(item => item.hit ? 190 : 100), 'green' );
                 this.rafId = null;
             }
         })
