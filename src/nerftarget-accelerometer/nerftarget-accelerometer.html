@@ -5,13 +5,12 @@
     <template>
         <style>
             :host {
-                 display:none;
+                display: none;
             }
         </style>
         <platinum-bluetooth-device name-prefix-filter="BBC" services-filter='["e95d0753-251d-470a-a062-fa1922dfa9a8"]'>
             <platinum-bluetooth-service service='e95d0753-251d-470a-a062-fa1922dfa9a8'>
-                <platinum-bluetooth-characteristic characteristic='e95dca4b-251d-470a-a062-fa1922dfa9a8'
-                                           on-value-changed="acceleroMeter"></platinum-bluetooth-characteristic>
+                <platinum-bluetooth-characteristic characteristic='e95dca4b-251d-470a-a062-fa1922dfa9a8' on-value-changed="acceleroMeter"></platinum-bluetooth-characteristic>
             </platinum-bluetooth-service>
         </platinum-bluetooth-device>
     </template>
