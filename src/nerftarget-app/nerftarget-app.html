@@ -60,7 +60,7 @@
         <div class="hitcounter">{{hitCount}}</div>
         <nerftarget-graph series="{{series}}"></nerftarget-graph>
       </div>
-      <nerftarget-accelerometer x="{{accX}}" y="{{accY}}" z="{{accZ}}" d="{{vec}}" device="{{device}}"></nerftarget-accelerometer>
+      <nerftarget-accelerometer d="{{vec}}" device="{{device}}"></nerftarget-accelerometer>
       <nerftarget-hit current-vector="{{vec}}" hit="{{currentHit}}" hit-level="{{hitLevel}}" hit-object="{{currentData}}"></nerftarget-hit>
     </app-header-layout>
   </template>
@@ -68,6 +68,9 @@
   <script>
     Polymer({
       properties: {
+        device: {
+          type: Object
+        },
         currentData: {
           type: Object,
           observer: 'dataChangeHandler'
