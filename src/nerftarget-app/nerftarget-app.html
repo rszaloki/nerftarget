@@ -136,7 +136,7 @@
 
       dataChangeHandler: function(newVal) {
         this.push('series', newVal);
-        if(this.series.length > 400) {
+        if(this.series.length > 320) {
           this.shift('series');
         }
       }

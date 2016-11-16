@@ -7,7 +7,7 @@
                  display:block;
             }
         </style>
-        <canvas width="400" height="200"></canvas>
+        <canvas width="320" height="200"></canvas>
     </template>
     <script>
         Polymer({
@@ -42,7 +42,7 @@
                 ctx.stroke();
             },
             paint: function() {
-                this.canvas.width = 400;
+                this.canvas.width = 320;
                 this.paintSeries(this.series.map(item => item.current), 'grey' );
                 this.paintSeries(this.series.map(item => item.hitHigh), 'red' );
                 this.paintSeries(this.series.map(item => item.hitLow), 'red' );
