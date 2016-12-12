@@ -1,67 +1,90 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/platinum-bluetooth/platinum-bluetooth-elements.html">
 
-<dom-module id="nerftarget-accelerometer">
+<dom-module id="nerftarget-bearing">
     <template>
         <style>
             :host {
                 display: none;
             }
         </style>
-        <platinum-bluetooth-device name-prefix-filter="BBC" services-filter='["e95d0753-251d-470a-a062-fa1922dfa9a8"]'>
+        <script src="../../lib/lpf.js"></script>
+        <platinum-bluetooth-device name-prefix-filter="BBC" services-filter='["e95d0753-251d-470a-a062-fa1922dfa9a8","e95df2d8-251d-470a-a062-fa1922dfa9a8"]'>
             <platinum-bluetooth-service service='e95d0753-251d-470a-a062-fa1922dfa9a8'>
                 <platinum-bluetooth-characteristic characteristic='e95dca4b-251d-470a-a062-fa1922dfa9a8' on-value-changed="acceleroMeter" id="accelerometer"></platinum-bluetooth-characteristic>
                 <platinum-bluetooth-characteristic characteristic='e95dfb24-251d-470a-a062-fa1922dfa9a8' id="samplerate" auto-write></platinum-bluetooth-characteristic>                
             </platinum-bluetooth-service>
+            <platinum-bluetooth-service service="e95df2d8-251d-470a-a062-fa1922dfa9a8">
+                <platinum-bluetooth-characteristic characteristic='e95dfb11-251d-470a-a062-fa1922dfa9a8' on-value-changed="magnetoMeter" id="magnetometer"></platinum-bluetooth-characteristic>
+            </platinum-bluetooth-device>
         </platinum-bluetooth-device>
     </template>
     <script>
+        const rad = 180 / Math.PI;
         Polymer({
-            is:'nerftarget-accelerometer',
+            is:'nerftarget-bearing',
             properties:{
-                x: {
+                roll: {
                     type: Number,
                     notify: true
                 },
-                y: {
+                pitch: {
                     type: Number,
                     notify: true                    
                 },
-                z: {
+                yaw: {
                     type: Number,
                     notify: true                    
-                },
-                d: {
-                    type: Number,
-                    notify: true
                 },
                 device: {
                     value:null,
                     notify: true
+                },
+                accelerometerFilters: {
+                    value:null
                 }
             },
             acceleroMeter: function(event) {
                 let dv = event.target.value;
+                if(!this.accelerometerFilters) {
+                    this.accelerometerFilters = {
+                        x: new LPF(),
+                        y: new LPF(),
+                        z: new LPF()
+                    }
+                }
+                let x = this.accelerometerFilters.x.next(dv.getInt16(0) / 1000);
+                let y = this.accelerometerFilters.y.next(dv.getInt16(2) / 1000);
+                let z = this.accelerometerFilters.z.next(dv.getInt16(4) / 1000);
+                this.pitch=Math.atan(x / Math.sqrt(Math.pow(y,2) + Math.pow(z,2))) * rad;
+                this.roll=Math.atan(y / Math.sqrt(Math.pow(x,2)+Math.pow(z,2))) * -rad;
+                console.log(this.pitch, this.roll);
+            },
+            magnetoMeter: function(event) {
+                let dv = event.target.value;
                 let x = dv.getInt16(0) / 1000;
                 let y = dv.getInt16(2) / 1000;
                 let z = dv.getInt16(4) / 1000;
-                let d = Math.abs(x) +  Math.abs(y) +  Math.abs(z);
-                this.x = x === this.x ? x+0.001 : x;
-                this.y = y === this.y ? y+0.001 : y;
-                this.z = z === this.z ? z+0.001 : z;
-                this.d = d === this.d ? d+0.001 : d;
-             },
+            },
             connect: function() {
                 let bd = this.$$('platinum-bluetooth-device');
                 let accelerometer = this.$$('#accelerometer');
+                let magnetometer = this.$$('#magnetometer');
                 let samplerate = this.$$('#samplerate');
                 bd.request()
                     .then( device => this.device = device )
                     .then( device => {
-                        samplerate.value = new Uint16Array([5]);
+                        samplerate.value = new Uint16Array([100]);
                         return device;
                     } )
-                    .then( device => accelerometer.startNotifications() )
+                    .then( device => { 
+                        accelerometer.startNotifications();
+                        return device;
+                     } )
+                    .then( device => { 
+                        magnetometer.startNotifications();
+                        return device;
+                     } )
                     .catch(error => console.log('error:',error));
             },
             disconnect: function() {

@@ -2,7 +2,7 @@
 <link rel="import" href="../../bower_components/app-layout/app-layout.html">
 <link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
-<link rel="import" href="../nerftarget-accelerometer/nerftarget-accelerometer.html">
+<link rel="import" href="../nerftarget-bearing/nerftarget-bearing.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../nerftarget-simplegraph/nerftarget-simplegraph.html">
 <link rel="import" href="../nerftarget-lpf/nerftarget-lpf.html">
@@ -63,16 +63,14 @@
       </app-header>
       <div id="content">
         <!-- div class="hitcounter">{{hitCount}}</div -->
-        <nerftarget-simplegraph value="{{sz}}" color="red" negatives></nerftarget-simplegraph>
+        <nerftarget-simplegraph value="{{z}}" color="red" negatives></nerftarget-simplegraph>
         <nerftarget-simplegraph value="{{sx}}" color="green" negatives></nerftarget-simplegraph>
         <nerftarget-simplegraph value="{{sy}}" color="blue" negatives></nerftarget-simplegraph>
-        <nerftarget-simplegraph value="{{sd}}" color="grey" smoothing="0.1" size="50"></nerftarget-simplegraph>
       </div>
       <nerftarget-lpf value="{{z}}" smooth="{{sz}}" ></nerftarget-lpf>
       <nerftarget-lpf value="{{x}}" smooth="{{sx}}" ></nerftarget-lpf>
       <nerftarget-lpf value="{{y}}" smooth="{{sy}}" ></nerftarget-lpf>
-      <nerftarget-lpf value="{{d}}" smooth="{{sd}}" ></nerftarget-lpf>
-      <nerftarget-accelerometer device="{{device}}" x="{{x}}" y="{{y}}" z="{{z}}" d="{{d}}"></nerftarget-accelerometer>
+      <nerftarget-bearing device="{{device}}" roll="{{x}}" pitch="{{y}}" yaw="{{z}}"></nerftarget-bearing>
     </app-header-layout>
   </template>
 
@@ -86,11 +84,11 @@
 
       is: 'nerftarget-app',
       connect: function(){
-        this.$$('nerftarget-accelerometer').connect();
+        this.$$('nerftarget-bearing').connect();
         this.hitCount = 0;
       },
       disconnect: function() {
-        this.$$('nerftarget-accelerometer').disconnect();
+        this.$$('nerftarget-bearing').disconnect();
       }
     });
   </script>
