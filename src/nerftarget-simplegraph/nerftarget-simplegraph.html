@@ -10,14 +10,14 @@
         <canvas width="{{width}}" height="{{height}}"></canvas>
     </template>
     <script>
+
         Polymer({
             properties: {
                 color: {
                     type: String
                 },
                 series: {
-                    type:Array,
-                    value:[]
+                    value:null
                 },
                 value: {
                     type:Number,
@@ -29,37 +29,48 @@
                 },
                 height: {
                     type: Number,
-                    value: 200
+                    value: 400
+                },
+                negatives: {
+                    type: Boolean,
+                    value: false
                 }
             },
-            observers: [
-                'repaint(series.splices)'
-            ],
             ready: function(){
                 this.canvas = this.$$('canvas');
             },
             valueChaged:function(newVal) {
-                this.push('series',newVal);
-                if(this.series.length > this.width) {
-                    this.shift('series');
+                if(newVal !== null) {
+                    if(!this.series) {
+                        this.series = [];
+                    }
+                    this.series.push(newVal);
+                    if(this.series.length > this.width) {
+                        this.series.shift();
+                    }
+                    this.repaint();
                 }
+            },
+            paint: function() {
+                let ctx = this.canvas.getContext('2d');
+                let h = this.negatives ? this.height/2 : this.height;
+                let series = this.series;
+                this.canvas.width = this.width;
+                ctx.beginPath();
+                ctx.strokeStyle = this.color;
+                ctx.moveTo(0, h - series[0]);
+                for(let i=1; i< series.length; i++) {
+                    ctx.lineTo(i,h-series[i]);
+                }
+                ctx.stroke();
+
+                
+
+                this.rafId = null;
             },
             repaint: function() {
                 if(!this.rafId && this.canvas) {
-                    this.rafId = window.requestAnimationFrame(() => {
-                        let ctx = this.canvas.getContext('2d');
-                        let h = this.height/2;
-                        let series = this.series;
-                        this.canvas.width = this.width;
-                        ctx.beginPath();
-                        ctx.strokeStyle = this.color;
-                        ctx.moveTo(0, h - series[0]);
-                        for(let i=1; i< series.length; i++) {
-                            ctx.lineTo(i,h-series[i]);
-                        }
-                        ctx.stroke(); 
-                        this.rafId = null;     
-                    });
+                    this.rafId = window.requestAnimationFrame(this.paint.bind(this));
                 }
             },
             

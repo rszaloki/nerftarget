@@ -19,17 +19,26 @@
                 smooth: {
                     type: Number,
                     notify: true
+                },
+                size: {
+                    type: Number,
+                    value: 20
+                },
+                smoothing: {
+                    type: Number,
+                    value: 0.2
                 }
             },
             lpf: null,
             _valueChanged: function(value) {
                 if(!this.lpf) {
-                    this.lpf = new LPF();
-                    this.lpf.bufferMaxSize = 40;
+                    this.lpf = new LPF(this.smoothing);
+                    this.lpf.bufferMaxSize = this.size;
                     this.lpf.init([]);
                 }
-                this.smooth = this.lpf.next(value);
-                console.log(value, this.smooth);
+                if(value !== null) {
+                    this.smooth = this.lpf.next(value);
+                }
             }
         })
     </script>

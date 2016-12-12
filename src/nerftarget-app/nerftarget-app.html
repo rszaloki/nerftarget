@@ -43,6 +43,12 @@
         line-height:2em;
         font-family: monospace;
       }
+
+      nerftarget-simplegraph {
+        position: absolute;
+        top:0;
+        left:0;
+      }
     </style>
     <app-header-layout>
       <app-header fixed condenses effects="waterfall">
@@ -57,16 +63,16 @@
       </app-header>
       <div id="content">
         <!-- div class="hitcounter">{{hitCount}}</div -->
-        <nerftarget-simplegraph value="{{sx}}" color="red"></nerftarget-simplegraph>
-        <nerftarget-simplegraph value="{{x}}" color="green"></nerftarget-simplegraph>
-        <nerftarget-simplegraph value="{{sz}}" color="blue"></nerftarget-simplegraph>
-        <nerftarget-simplegraph series="{{series}}" color="grey"></nerftarget-simplegraph>
+        <nerftarget-simplegraph value="{{sz}}" color="red" negatives></nerftarget-simplegraph>
+        <nerftarget-simplegraph value="{{sx}}" color="green" negatives></nerftarget-simplegraph>
+        <nerftarget-simplegraph value="{{sy}}" color="blue" negatives></nerftarget-simplegraph>
+        <nerftarget-simplegraph value="{{sd}}" color="grey" smoothing="0.1" size="50"></nerftarget-simplegraph>
       </div>
-      <nerftarget-lpf value="{{vec}}" smooth="{{smoothed}}" ></nerftarget-lpf>
+      <nerftarget-lpf value="{{z}}" smooth="{{sz}}" ></nerftarget-lpf>
       <nerftarget-lpf value="{{x}}" smooth="{{sx}}" ></nerftarget-lpf>
       <nerftarget-lpf value="{{y}}" smooth="{{sy}}" ></nerftarget-lpf>
-      <nerftarget-lpf value="{{z}}" smooth="{{sz}}" ></nerftarget-lpf>
-      <nerftarget-accelerometer d="{{vec}}" device="{{device}}" x="{{x}}" y="{{y}}" z="{{z}}"></nerftarget-accelerometer>
+      <nerftarget-lpf value="{{d}}" smooth="{{sd}}" ></nerftarget-lpf>
+      <nerftarget-accelerometer device="{{device}}" x="{{x}}" y="{{y}}" z="{{z}}" d="{{d}}"></nerftarget-accelerometer>
     </app-header-layout>
   </template>
 
@@ -75,77 +81,17 @@
       properties: {
         device: {
           type: Object
-        },
-        smoothed: {
-          type: Number,
-          observer: 'dataChangeHandler'
-        },
-        series: {
-          type: Array,
-          value:[],
-          notify:true
-        },
-        hitLevel:{
-          type:Number,
-          value:0.4
-        },
-        hitCount: {
-          type: Number,
-          value: 0
-        },
-        currentHit: {
-          type: Boolean,
-          value: false,
-          observer: 'hitChange'
         }
       },
 
       is: 'nerftarget-app',
-      ready: function() {
-        var littleEndian = (function() {
-          var buffer = new ArrayBuffer(2);
-          new DataView(buffer).setInt16(0, 256, true /* littleEndian */);
-          // Int16Array uses the platform's endianness.
-          return new Int16Array(buffer)[0] === 256;
-        })();
-        console.log('littleEndian: '+littleEndian); // true or false
-      },
-
       connect: function(){
         this.$$('nerftarget-accelerometer').connect();
         this.hitCount = 0;
       },
-
       disconnect: function() {
         this.$$('nerftarget-accelerometer').disconnect();
-      },
-
-      startHitMeasure: function(){
-        return new Promise(function(resolve, reject){
-          this.measuring = true;
-          setTimeout(()=>{
-            resolve(this.currentHit ? 0 : 1);
-          },500);
-        });
-
-      },
-
-      hitChange: function(newVal){
-        if(newVal && !this.measuring) {
-          this.startHitMeasure().then((countedHit) => {
-            this.hitCount+=countedHit;
-            this.measuring = false;
-          });
-        }
-      },
-
-      dataChangeHandler: function(newVal) {
-        this.push('series', newVal);
-        if(this.series.length > 320) {
-          this.shift('series');
-        }
       }
-
     });
   </script>
 </dom-module>

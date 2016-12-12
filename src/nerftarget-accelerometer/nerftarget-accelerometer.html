@@ -42,14 +42,18 @@
             },
             acceleroMeter: function(event) {
                 let dv = event.target.value;
-                let x = dv.getInt16(0) / 500;
-                let y = dv.getInt16(2) / 500;
-                let z = dv.getInt16(4) / 500;
-                let d = x * x + y * y + z * z;
+                let x = dv.getInt16(0) / 200;
+                let y = dv.getInt16(2) / 200;
+                let z = dv.getInt16(4) / 200;
+                let d = Math.abs(x) +  Math.abs(y) +  Math.abs(z);
+                this.x = null;
                 this.x = x;
+                this.y = null;
                 this.y = y;
+                this.z = null;
                 this.z = z;
-                this.d = Math.abs(Math.sqrt(d));
+                this.d = null;
+                this.d = d;
              },
             connect: function() {
                 let bd = this.$$('platinum-bluetooth-device');
