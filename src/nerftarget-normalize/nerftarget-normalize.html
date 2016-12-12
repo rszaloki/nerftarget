@@ -1,0 +1,52 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<script src="../../lib/lpf.js"></script>
+
+<dom-module id="nerftarget-normalize">
+    <template>
+        <style>
+            :host {
+                 display:hidden;
+            }
+        </style>
+    </template>
+    <script>
+        Polymer({
+            properties: {
+                rawData:{
+                    value:null,
+                    observer:'normalize'
+                },
+                x: {
+                    value:0,
+                    notify: true
+                },
+                y: {
+                    value:0,
+                    notify: true
+                },
+                z: {
+                    value:0,
+                    notify: true
+                },
+                filters: {
+                    value:null
+                }
+            },
+            normalize: function(rawData) {
+                if(rawData) {
+                    if(!this.filters) {
+                        this.filters = {
+                            x: new LPF(),
+                            y: new LPF(),
+                            z: new LPF()
+                        }
+                    }
+                    this.x = this.filters.x.next(rawData.getInt16(0, true) / 1000);
+                    this.y = this.filters.y.next(rawData.getInt16(2, true) / 1000);
+                    this.z = this.filters.z.next(rawData.getInt16(4, true) / 1000);
+                }
+            },
+            is:'nerftarget-normalize'
+        })
+    </script>
+</dom-module>

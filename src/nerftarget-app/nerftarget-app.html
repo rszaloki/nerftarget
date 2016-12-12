@@ -5,7 +5,6 @@
 <link rel="import" href="../nerftarget-bearing/nerftarget-bearing.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../nerftarget-simplegraph/nerftarget-simplegraph.html">
-<link rel="import" href="../nerftarget-lpf/nerftarget-lpf.html">
 
 
 
@@ -63,13 +62,10 @@
       </app-header>
       <div id="content">
         <!-- div class="hitcounter">{{hitCount}}</div -->
-        <nerftarget-simplegraph value="{{z}}" color="red" negatives></nerftarget-simplegraph>
-        <nerftarget-simplegraph value="{{sx}}" color="green" negatives></nerftarget-simplegraph>
-        <nerftarget-simplegraph value="{{sy}}" color="blue" negatives></nerftarget-simplegraph>
+        <div>{{z}}</div>
+        <nerftarget-simplegraph value="{{x}}" color="green" negatives></nerftarget-simplegraph>
+        <nerftarget-simplegraph value="{{y}}" color="blue" negatives></nerftarget-simplegraph>
       </div>
-      <nerftarget-lpf value="{{z}}" smooth="{{sz}}" ></nerftarget-lpf>
-      <nerftarget-lpf value="{{x}}" smooth="{{sx}}" ></nerftarget-lpf>
-      <nerftarget-lpf value="{{y}}" smooth="{{sy}}" ></nerftarget-lpf>
       <nerftarget-bearing device="{{device}}" roll="{{x}}" pitch="{{y}}" yaw="{{z}}"></nerftarget-bearing>
     </app-header-layout>
   </template>
@@ -83,6 +79,15 @@
       },
 
       is: 'nerftarget-app',
+      ready: function() {
+        var littleEndian = (function() {
+          var buffer = new ArrayBuffer(2);
+          new DataView(buffer).setInt16(0, 256, true /* littleEndian */);
+          // Int16Array uses the platform's endianness.
+          return new Int16Array(buffer)[0] === 256;
+        })();
+        console.log('littleEndian: '+littleEndian); // true or false
+      },
       connect: function(){
         this.$$('nerftarget-bearing').connect();
         this.hitCount = 0;

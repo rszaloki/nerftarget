@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/platinum-bluetooth/platinum-bluetooth-elements.html">
+<link rel="import" href="../nerftarget-normalize/nerftarget-normalize.html">
 
 <dom-module id="nerftarget-bearing">
     <template>
@@ -8,7 +9,6 @@
                 display: none;
             }
         </style>
-        <script src="../../lib/lpf.js"></script>
         <platinum-bluetooth-device name-prefix-filter="BBC" services-filter='["e95d0753-251d-470a-a062-fa1922dfa9a8","e95df2d8-251d-470a-a062-fa1922dfa9a8"]'>
             <platinum-bluetooth-service service='e95d0753-251d-470a-a062-fa1922dfa9a8'>
                 <platinum-bluetooth-characteristic characteristic='e95dca4b-251d-470a-a062-fa1922dfa9a8' on-value-changed="acceleroMeter" id="accelerometer"></platinum-bluetooth-characteristic>
@@ -18,6 +18,8 @@
                 <platinum-bluetooth-characteristic characteristic='e95dfb11-251d-470a-a062-fa1922dfa9a8' on-value-changed="magnetoMeter" id="magnetometer"></platinum-bluetooth-characteristic>
             </platinum-bluetooth-device>
         </platinum-bluetooth-device>
+        <nerftarget-normalize raw-data="{{rawAccelerometer}}" x="{{accelX}}" y="{{accelY}}" z="{{accelZ}}"></nerftarget-normalize>
+        <nerftarget-normalize raw-data="{{rawMagnetometer}}" x="{{magX}}" y="{{magY}}" z="{{magZ}}"></nerftarget-normalize>
     </template>
     <script>
         const rad = 180 / Math.PI;
@@ -40,31 +42,43 @@
                     value:null,
                     notify: true
                 },
-                accelerometerFilters: {
-                    value:null
+                accelX: {
+                    type: Number,
+                    observer: "recalculate"
+                },
+                accelY: {
+                    type: Number,
+                    observer: "recalculate"
+                },
+                accelZ: {
+                    type: Number,
+                    observer: "recalculate"
+                },
+                magX: {
+                    type: Number,
+                    observer: "recalculate"
+                },
+                magY: {
+                    type: Number,
+                    observer: "recalculate"
+                },
+                magZ: {
+                    type: Number,
+                    observer: "recalculate"
                 }
             },
             acceleroMeter: function(event) {
-                let dv = event.target.value;
-                if(!this.accelerometerFilters) {
-                    this.accelerometerFilters = {
-                        x: new LPF(),
-                        y: new LPF(),
-                        z: new LPF()
-                    }
-                }
-                let x = this.accelerometerFilters.x.next(dv.getInt16(0) / 1000);
-                let y = this.accelerometerFilters.y.next(dv.getInt16(2) / 1000);
-                let z = this.accelerometerFilters.z.next(dv.getInt16(4) / 1000);
-                this.pitch=Math.atan(x / Math.sqrt(Math.pow(y,2) + Math.pow(z,2))) * rad;
-                this.roll=Math.atan(y / Math.sqrt(Math.pow(x,2)+Math.pow(z,2))) * -rad;
-                console.log(this.pitch, this.roll);
+                this.rawAccelerometer = event.target.value; 
             },
             magnetoMeter: function(event) {
-                let dv = event.target.value;
-                let x = dv.getInt16(0) / 1000;
-                let y = dv.getInt16(2) / 1000;
-                let z = dv.getInt16(4) / 1000;
+                this.rawMagnetometer = event.target.value;
+            },
+            recalculate: function() {
+                let pitch =  Math.atan(this.accelX / Math.sqrt(Math.pow(this.accelY,2) + Math.pow(this.accelZ,2)));
+                let roll = -Math.atan(this.accelY / Math.sqrt(Math.pow(this.accelX,2)+Math.pow(this.accelZ,2)));
+                this.pitch = pitch * rad;
+                this.roll =  roll * rad;
+                this.yaw = 180 + Math.atan2( (-this.magY*Math.cos(roll) + this.magZ*Math.sin(roll) ) , (this.magX*Math.cos(pitch) + this.magY*Math.sin(pitch)*Math.sin(roll)+ this.magZ*Math.sin(pitch)*Math.cos(roll)) ) * rad;
             },
             connect: function() {
                 let bd = this.$$('platinum-bluetooth-device');
@@ -74,7 +88,7 @@
                 bd.request()
                     .then( device => this.device = device )
                     .then( device => {
-                        samplerate.value = new Uint16Array([100]);
+                        samplerate.value = new Uint16Array([5]);
                         return device;
                     } )
                     .then( device => { 
