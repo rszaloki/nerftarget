@@ -1,0 +1,36 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<script src="lpf.js"></script>
+<dom-module id="nerftarget-lpf">
+    <template>
+        <style>
+            :host {
+                 display:none;
+            }
+        </style>
+    </template>
+    <script>
+        Polymer({
+            is:'nerftarget-lpf',
+            properties: {
+                value: {
+                    type: Number,
+                    observer: '_valueChanged'
+                },
+                smooth: {
+                    type: Number,
+                    notify: true
+                }
+            },
+            lpf: null,
+            _valueChanged: function(value) {
+                if(!this.lpf) {
+                    this.lpf = new LPF();
+                    this.lpf.bufferMaxSize = 40;
+                    this.lpf.init([]);
+                }
+                this.smooth = this.lpf.next(value);
+                console.log(value, this.smooth);
+            }
+        })
+    </script>
+</dom-module>

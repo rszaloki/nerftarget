@@ -4,9 +4,8 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../nerftarget-accelerometer/nerftarget-accelerometer.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../nerftarget-graph/nerftarget-graph.html">
-<link rel="import" href="../nerftarget-hit/nerftarget-hit.html">
-
+<link rel="import" href="../nerftarget-simplegraph/nerftarget-simplegraph.html">
+<link rel="import" href="../nerftarget-lpf/nerftarget-lpf.html">
 
 
 
@@ -57,11 +56,17 @@
         </app-toolbar>
       </app-header>
       <div id="content">
-        <div class="hitcounter">{{hitCount}}</div>
-        <nerftarget-graph series="{{series}}"></nerftarget-graph>
+        <!-- div class="hitcounter">{{hitCount}}</div -->
+        <nerftarget-simplegraph value="{{sx}}" color="red"></nerftarget-simplegraph>
+        <nerftarget-simplegraph value="{{x}}" color="green"></nerftarget-simplegraph>
+        <nerftarget-simplegraph value="{{sz}}" color="blue"></nerftarget-simplegraph>
+        <nerftarget-simplegraph series="{{series}}" color="grey"></nerftarget-simplegraph>
       </div>
-      <nerftarget-accelerometer d="{{vec}}" device="{{device}}"></nerftarget-accelerometer>
-      <nerftarget-hit current-vector="{{vec}}" hit="{{currentHit}}" hit-level="{{hitLevel}}" hit-object="{{currentData}}"></nerftarget-hit>
+      <nerftarget-lpf value="{{vec}}" smooth="{{smoothed}}" ></nerftarget-lpf>
+      <nerftarget-lpf value="{{x}}" smooth="{{sx}}" ></nerftarget-lpf>
+      <nerftarget-lpf value="{{y}}" smooth="{{sy}}" ></nerftarget-lpf>
+      <nerftarget-lpf value="{{z}}" smooth="{{sz}}" ></nerftarget-lpf>
+      <nerftarget-accelerometer d="{{vec}}" device="{{device}}" x="{{x}}" y="{{y}}" z="{{z}}"></nerftarget-accelerometer>
     </app-header-layout>
   </template>
 
@@ -71,8 +76,8 @@
         device: {
           type: Object
         },
-        currentData: {
-          type: Object,
+        smoothed: {
+          type: Number,
           observer: 'dataChangeHandler'
         },
         series: {

@@ -1,0 +1,69 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="nerftarget-simplegraph">
+    <template>
+        <style>
+            :host {
+                 display:block;
+            }
+        </style>
+        <canvas width="{{width}}" height="{{height}}"></canvas>
+    </template>
+    <script>
+        Polymer({
+            properties: {
+                color: {
+                    type: String
+                },
+                series: {
+                    type:Array,
+                    value:[]
+                },
+                value: {
+                    type:Number,
+                    observer:'valueChaged'
+                },
+                width:{
+                    type: Number,
+                    value: 320
+                },
+                height: {
+                    type: Number,
+                    value: 200
+                }
+            },
+            observers: [
+                'repaint(series.splices)'
+            ],
+            ready: function(){
+                this.canvas = this.$$('canvas');
+            },
+            valueChaged:function(newVal) {
+                this.push('series',newVal);
+                if(this.series.length > this.width) {
+                    this.shift('series');
+                }
+            },
+            repaint: function() {
+                if(!this.rafId && this.canvas) {
+                    this.rafId = window.requestAnimationFrame(() => {
+                        let ctx = this.canvas.getContext('2d');
+                        let h = this.height/2;
+                        let series = this.series;
+                        this.canvas.width = this.width;
+                        ctx.beginPath();
+                        ctx.strokeStyle = this.color;
+                        ctx.moveTo(0, h - series[0]);
+                        for(let i=1; i< series.length; i++) {
+                            ctx.lineTo(i,h-series[i]);
+                        }
+                        ctx.stroke(); 
+                        this.rafId = null;     
+                    });
+                }
+            },
+            
+            is:'nerftarget-simplegraph'
+        })
+    </script>
+</dom-module>
