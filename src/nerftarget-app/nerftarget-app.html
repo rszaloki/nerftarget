@@ -21,10 +21,12 @@
         display: block;
         font-family: sans-serif;
         background-color: var(--paper-grey-50);
-        text-align:center;        
+        text-align:center; 
+        display: flex;       
+        flex-direction: column;
       }
 
-      app-header {
+      app-toolbar {
         background-color: var(--paper-blue-500);
         color: white;
       }
@@ -36,6 +38,19 @@
 
       #content {
         color: var(--paper-grey-800);
+        position: relative;
+        flex:1;
+      }
+
+      #dot {
+        background: red;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        background-clip: border-box;
+        position:absolute;
+        top: 50%;
+        left: 50%;
       }
 
       .hitcounter {
@@ -50,26 +65,25 @@
         left:0;
       }
     </style>
-    <app-header-layout>
-      <app-header fixed condenses effects="waterfall">
-        <app-toolbar>
-          <template is="dom-if" if="{{!device}}">
-            <paper-button id="connect" raised on-tap="connect">Connect</paper-button>
-          </template>
-          <template is="dom-if" if="{{device}}">
-            <paper-button id="disconnect" raised on-tap="disconnect">Disconnect</paper-button>
-          </template>
-        </app-toolbar>
-      </app-header>
+      <app-toolbar>
+        <template is="dom-if" if="{{!device}}">
+          <paper-button id="connect" raised on-tap="connect">Connect</paper-button>
+        </template>
+        <template is="dom-if" if="{{device}}">
+          <paper-button id="disconnect" raised on-tap="disconnect">Disconnect</paper-button>
+        </template>
+      </app-toolbar>
       <div id="content">
-        <!-- div class="hitcounter">{{hitCount}}</div -->
-        <div>{{z}}</div>
-        <div>{{b}}</div>
-        <nerftarget-simplegraph value="{{x}}" color="green" negatives></nerftarget-simplegraph>
-        <nerftarget-simplegraph value="{{y}}" color="blue" negatives></nerftarget-simplegraph>
+        <div id="text">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus molestie diam iaculis egestas sollicitudin. Sed eu libero eros. Duis eget dictum diam. Praesent eget nibh sit amet sapien condimentum feugiat sed vel enim. Phasellus id enim vel orci mollis commodo id in mi. Proin varius egestas egestas. Proin ullamcorper enim eros, ut aliquam velit feugiat eget. Donec dapibus nisi id enim tincidunt, rutrum aliquet sem ultrices.</p>
+
+<p>Maecenas purus ipsum, lacinia sollicitudin mauris quis, elementum feugiat diam. Suspendisse eget egestas eros. Proin facilisis dapibus semper. Quisque sed egestas erat. Nam blandit enim at ultricies ullamcorper. Morbi scelerisque elit vel porttitor aliquam. Sed cursus pellentesque nibh. Donec ut erat et nulla porta placerat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ac accumsan neque. Pellentesque varius, ligula et cursus convallis, arcu sem semper ipsum, eget pellentesque orci nibh eget ante. Vestibulum libero tortor, mattis ut mauris eu, lacinia iaculis ex. Nulla facilisi. Sed dapibus, ligula non commodo vestibulum, diam lorem iaculis ante, ut vehicula metus dolor in magna. Cras faucibus turpis in ullamcorper accumsan. Suspendisse porta arcu quam.</p>
+
+<p>Sed tincidunt, eros in tempus dignissim, erat nulla dapibus dui, et condimentum est dui vitae leo. Praesent posuere mauris eu nunc aliquet, a dignissim quam interdum. Quisque efficitur dui id nunc sollicitudin porttitor. Donec ante augue, bibendum pulvinar quam in, bibendum condimentum turpis. Mauris bibendum semper lorem, ut viverra dolor commodo ut. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean porta consectetur arcu, non porttitor turpis auctor ac. Nunc sapien magna, volutpat a justo sed, congue fermentum dolor. Suspendisse a velit posuere, vulputate velit ac, luctus nibh. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Duis vel efficitur leo, aliquet feugiat purus. Pellentesque tortor magna, tempor eget enim vel, feugiat fringilla risus. Vivamus volutpat odio ac lorem lobortis mattis. Fusce vel dignissim velit. Fusce semper luctus dictum.</p>
+        </div>
       </div>
-      <nerftarget-bearing device="{{device}}" roll="{{x}}" pitch="{{y}}" yaw="{{z}}" bearing="{{b}}"></nerftarget-bearing>
-    </app-header-layout>
+      <nerftarget-lpf value="{{ry}}" smooth="{{y}}"></nerftarget-lpf>
+      <nerftarget-bearing device="{{device}}" roll="{{x}}" pitch="{{ry}}" yaw="{{z}}" bearing="{{b}}"></nerftarget-bearing>
   </template>
 
   <script>
@@ -77,6 +91,14 @@
       properties: {
         device: {
           type: Object
+        },
+        x: {
+          type: Number,
+          observer: "repaint"
+        },
+        y: {
+          type: Number,
+          observer: "repaint"          
         }
       },
 
@@ -96,6 +118,11 @@
       },
       disconnect: function() {
         this.$$('nerftarget-bearing').disconnect();
+      },
+      repaint: function() {
+        let x = this.x;
+        let y = this.y;
+        this.$$('#text').style.transform=`rotate(${y}deg)`;
       }
     });
   </script>
