@@ -5,6 +5,7 @@
 <link rel="import" href="../nerftarget-bearing/nerftarget-bearing.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../nerftarget-simplegraph/nerftarget-simplegraph.html">
+<link rel="import" href="../nerftarget-lpf/nerftarget-lpf.html">
 
 
 
@@ -63,10 +64,11 @@
       <div id="content">
         <!-- div class="hitcounter">{{hitCount}}</div -->
         <div>{{z}}</div>
+        <div>{{b}}</div>
         <nerftarget-simplegraph value="{{x}}" color="green" negatives></nerftarget-simplegraph>
         <nerftarget-simplegraph value="{{y}}" color="blue" negatives></nerftarget-simplegraph>
       </div>
-      <nerftarget-bearing device="{{device}}" roll="{{x}}" pitch="{{y}}" yaw="{{z}}"></nerftarget-bearing>
+      <nerftarget-bearing device="{{device}}" roll="{{x}}" pitch="{{y}}" yaw="{{z}}" bearing="{{b}}"></nerftarget-bearing>
     </app-header-layout>
   </template>
 

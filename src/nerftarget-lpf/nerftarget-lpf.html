@@ -14,6 +14,7 @@
             properties: {
                 value: {
                     type: Number,
+                    value: null,
                     observer: '_valueChanged'
                 },
                 smooth: {
@@ -33,10 +34,8 @@
             _valueChanged: function(value) {
                 if(!this.lpf) {
                     this.lpf = new LPF(this.smoothing);
-                    this.lpf.bufferMaxSize = this.size;
-                    this.lpf.init([]);
                 }
-                if(value !== null) {
+                if(value !== null && !isNaN(value)) {
                     this.smooth = this.lpf.next(value);
                 }
             }
