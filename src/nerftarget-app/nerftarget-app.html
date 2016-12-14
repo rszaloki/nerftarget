@@ -5,7 +5,7 @@
 <link rel="import" href="../nerftarget-bearing/nerftarget-bearing.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../nerftarget-simplegraph/nerftarget-simplegraph.html">
-<link rel="import" href="../nerftarget-lpf/nerftarget-lpf.html">
+<link rel="import" href="../nerftarget-hit/nerftarget-hit.html">
 
 
 
@@ -40,7 +40,7 @@
         color: var(--paper-grey-800);
         position: relative;
         flex:1;
-        text-align: left;
+        text-align: center;
         overflow: hidden;
       }
 
@@ -69,7 +69,6 @@
       }
 
       nerftarget-simplegraph {
-        position: absolute;
         top:0;
         left:0;
       }
@@ -83,16 +82,12 @@
         </template>
       </app-toolbar>
       <div id="content">
-        <div id="text">
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus molestie diam iaculis egestas sollicitudin. Sed eu libero eros. Duis eget dictum diam. Praesent eget nibh sit amet sapien condimentum feugiat sed vel enim. Phasellus id enim vel orci mollis commodo id in mi. Proin varius egestas egestas. Proin ullamcorper enim eros, ut aliquam velit feugiat eget. Donec dapibus nisi id enim tincidunt, rutrum aliquet sem ultrices.</p>
-
-<p>Maecenas purus ipsum, lacinia sollicitudin mauris quis, elementum feugiat diam. Suspendisse eget egestas eros. Proin facilisis dapibus semper. Quisque sed egestas erat. Nam blandit enim at ultricies ullamcorper. Morbi scelerisque elit vel porttitor aliquam. Sed cursus pellentesque nibh. Donec ut erat et nulla porta placerat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ac accumsan neque. Pellentesque varius, ligula et cursus convallis, arcu sem semper ipsum, eget pellentesque orci nibh eget ante. Vestibulum libero tortor, mattis ut mauris eu, lacinia iaculis ex. Nulla facilisi. Sed dapibus, ligula non commodo vestibulum, diam lorem iaculis ante, ut vehicula metus dolor in magna. Cras faucibus turpis in ullamcorper accumsan. Suspendisse porta arcu quam.</p>
-
-<p>Sed tincidunt, eros in tempus dignissim, erat nulla dapibus dui, et condimentum est dui vitae leo. Praesent posuere mauris eu nunc aliquet, a dignissim quam interdum. Quisque efficitur dui id nunc sollicitudin porttitor. Donec ante augue, bibendum pulvinar quam in, bibendum condimentum turpis. Mauris bibendum semper lorem, ut viverra dolor commodo ut. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean porta consectetur arcu, non porttitor turpis auctor ac. Nunc sapien magna, volutpat a justo sed, congue fermentum dolor. Suspendisse a velit posuere, vulputate velit ac, luctus nibh. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Duis vel efficitur leo, aliquet feugiat purus. Pellentesque tortor magna, tempor eget enim vel, feugiat fringilla risus. Vivamus volutpat odio ac lorem lobortis mattis. Fusce vel dignissim velit. Fusce semper luctus dictum.</p>
-        </div>
+        <div class="hitcounter">{{hitCount}}</div>
+        <nerftarget-simplegraph value="{{d}}" color="green" height="200"></nerftarget-simplegraph>
       </div>
-      <nerftarget-lpf value="{{ry}}" smooth="{{y}}"></nerftarget-lpf>
-      <nerftarget-bearing device="{{device}}" roll="{{x}}" pitch="{{ry}}" yaw="{{z}}" bearing="{{b}}"></nerftarget-bearing>
+      <nerftarget-bearing device="{{device}}" distance="{{d}}"></nerftarget-bearing>
+      <nerftarget-hit current-vector="{{d}}" hit="{{hit}}" active="{{measuring}}"></nerftarget-hit>
+    </app-header-layout>
   </template>
 
   <script>
@@ -101,13 +96,16 @@
         device: {
           type: Object
         },
-        x: {
-          type: Number,
-          observer: "repaint"
+        hit: {
+          value:null,
+          observer: "hitChange"
         },
-        y: {
-          type: Number,
-          observer: "repaint"          
+        hitCount: {
+          value:0,
+          notify: true
+        },
+        measuring: {
+          value: 0
         }
       },
 
@@ -121,17 +119,21 @@
         })();
         console.log('littleEndian: '+littleEndian); // true or false
       },
+      hitChange: function(newVal) {
+        if(newVal) {
+          this.hitCount++;
+          this.measuring = 0;
+          this.startMeasuring();
+        }
+      },
       connect: function(){
-        this.$$('nerftarget-bearing').connect();
-        this.hitCount = 0;
+        this.$$('nerftarget-bearing').connect().then(() => this.startMeasuring(5000));
       },
       disconnect: function() {
         this.$$('nerftarget-bearing').disconnect();
       },
-      repaint: function() {
-        let x = this.x;
-        let y = this.y;
-        this.$$('#text').style.transform=`rotate(${y}deg)`;
+      startMeasuring: function(to = 500) {
+        setTimeout(() => this.measuring = 1, to );
       }
     });
   </script>

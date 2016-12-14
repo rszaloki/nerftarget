@@ -1,7 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/platinum-bluetooth/platinum-bluetooth-elements.html">
 <link rel="import" href="../nerftarget-normalize/nerftarget-normalize.html">
-<link rel="import" href="../nerftarget-lpf/nerftarget-lpf.html">
 
 <dom-module id="nerftarget-bearing">
     <template>
@@ -10,21 +9,13 @@
                 display: none;
             }
         </style>
-        <platinum-bluetooth-device name-prefix-filter="BBC" services-filter='["e95d0753-251d-470a-a062-fa1922dfa9a8","e95df2d8-251d-470a-a062-fa1922dfa9a8"]'>
+        <platinum-bluetooth-device name-prefix-filter="BBC" services-filter='["e95d0753-251d-470a-a062-fa1922dfa9a8"]'>
             <platinum-bluetooth-service service='e95d0753-251d-470a-a062-fa1922dfa9a8'>
                 <platinum-bluetooth-characteristic characteristic='e95dca4b-251d-470a-a062-fa1922dfa9a8' on-value-changed="acceleroMeter" id="accelerometer"></platinum-bluetooth-characteristic>
                 <platinum-bluetooth-characteristic characteristic='e95dfb24-251d-470a-a062-fa1922dfa9a8' id="acceleroSamplerate" auto-write></platinum-bluetooth-characteristic>                
             </platinum-bluetooth-service>
-            <platinum-bluetooth-service service="e95df2d8-251d-470a-a062-fa1922dfa9a8">
-                <platinum-bluetooth-characteristic characteristic='e95dfb11-251d-470a-a062-fa1922dfa9a8' on-value-changed="magnetoMeter" id="magnetometer"></platinum-bluetooth-characteristic>
-                <platinum-bluetooth-characteristic characteristic='e95d9715-251d-470a-a062-fa1922dfa9a8' on-value-changed="bearingMeter" id="bearingmeter"></platinum-bluetooth-characteristic>
-                <platinum-bluetooth-characteristic characteristic='e95dfb24-251d-470a-a062-fa1922dfa9a8' id="magnetoSamplerate" auto-write></platinum-bluetooth-characteristic>                
-            </platinum-bluetooth-device>
         </platinum-bluetooth-device>
         <nerftarget-normalize raw-data="{{rawAccelerometer}}" x="{{accelX}}" y="{{accelY}}" z="{{accelZ}}"></nerftarget-normalize>
-        <nerftarget-normalize raw-data="{{rawMagnetometer}}" x="{{magX}}" y="{{magY}}" z="{{magZ}}"></nerftarget-normalize>
-        <nerftarget-lpf value="{{rawBearing}}" smooth="{{bearing}}" ></nerftarget-lpf>
-
     </template>
     <script>
         const rad = 180 / Math.PI;
@@ -46,11 +37,6 @@
                     value: 0,
                     notify: true                    
                 },
-                bearing: {
-                    type: Number,
-                    value: 0,
-                    notify: true                                        
-                },
                 device: {
                     value:null,
                     notify: true
@@ -67,55 +53,30 @@
                     type: Number,
                     observer: "recalculate"
                 },
-                magX: {
+                distance: {
                     type: Number,
-                    observer: "recalculate"
-                },
-                magY: {
-                    type: Number,
-                    observer: "recalculate"
-                },
-                magZ: {
-                    type: Number,
-                    observer: "recalculate"
+                    notify: true
                 }
             },
             acceleroMeter: function(event) {
                 this.rawAccelerometer = event.target.value; 
             },
-            magnetoMeter: function(event) {
-                this.rawMagnetometer = event.target.value;
-            },
-            bearingMeter: function(event) {
-                this.rawBearing = event.target.value.getUint16(0, true);
-            },
             recalculate: function() {
-                let pitch =  Math.atan(this.accelX / Math.sqrt(Math.pow(this.accelY,2) + Math.pow(this.accelZ,2)));
-                let roll = -Math.atan(this.accelY / Math.sqrt(Math.pow(this.accelX,2)+Math.pow(this.accelZ,2)));
-                this.pitch = pitch * rad;
-                this.roll =  roll * rad;
-                let yaw = Math.atan2( (-this.magY*Math.cos(roll) + this.magZ*Math.sin(roll) ) , (this.magX*Math.cos(pitch) + this.magY*Math.sin(pitch)*Math.sin(roll)+ this.magZ*Math.sin(pitch)*Math.cos(roll)) );
-                this.yaw = yaw >= 0 ? yaw * rad : yaw * -rad;
+                this.distance = Math.sqrt( Math.pow(this.accelX,2) + Math.pow(this.accelY,2) + Math.pow(this.accelZ,2) ) * 100;
             },
             connect: function() {
                 let bd = this.$$('platinum-bluetooth-device');
                 let accelerometer = this.$$('#accelerometer');
-                let magnetometer = this.$$('#magnetometer');
-                let bearingmeter = this.$$('#bearingmeter');
                 let acceleroSamplerate = this.$$('#acceleroSamplerate');
-                let magnetoSamplerate = this.$$('#magnetoSamplerate');
-                bd.request()
+                return bd.request()
                     .then( device => this.device = device )
                     .then( device => {
                         let sampleRate = 5
                         acceleroSamplerate.value = new Uint16Array([sampleRate]);
-                        magnetoSamplerate.value = new Uint16Array([sampleRate]);
                         return device;
                     })
                     .then( device => { 
                         accelerometer.startNotifications();
-                        magnetometer.startNotifications();
-                        bearingmeter.startNotifications();
                         return device;
                      } )
                     .catch(error => console.log('error:',error));
